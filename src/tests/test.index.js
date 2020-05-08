@@ -3,7 +3,7 @@
 const assert = require('chai').assert;
 const format = require('../index.js');
 const BN = require('bn.js');
-const schema = require('ethjs-schema');
+const schema = require('cfxjs-schema');
 
 describe('test ethjs-format object', () => {
   describe('test formatQuantity', () => {

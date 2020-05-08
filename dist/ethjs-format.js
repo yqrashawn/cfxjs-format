@@ -5752,7 +5752,18 @@ module.exports = {
 				"EstimateTransaction",
 				"Q|T"
 			],
-			"Q",
+			"EstimateGasAndCollateralResult",
+			1
+		],
+		"eth_checkBalanceAgainstTransaction": [
+			[
+				"D20",
+				"D20",
+				"Q",
+				"Q",
+				"Q"
+			],
+			"CheckBalanceAgainstTransactionResult",
 			1
 		],
 		"eth_getBlockByHash": [
@@ -6049,6 +6060,17 @@ module.exports = {
 			"value": "Q",
 			"data": "D",
 			"nonce": "Q"
+		},
+		"EstimateGasAndCollateralResult": {
+			"__required": [],
+			"gasUsed": "Q",
+			"storageCollateralized": "Q"
+		},
+		"CheckBalanceAgainstTransactionResult": {
+			"__required": [],
+			"isBalanceEnough": "B",
+			"willPayCollateral": "B",
+			"willPayTxFee": "B"
 		},
 		"CallTransaction": {
 			"__required": [

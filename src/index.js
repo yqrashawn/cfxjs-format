@@ -1,4 +1,4 @@
-const schema = require('ethjs-schema');
+const schema = require('cfxjs-schema');
 const util = require('ethjs-util');
 const numberToBN = require('number-to-bn');
 const stripHexPrefix = require('strip-hex-prefix');
