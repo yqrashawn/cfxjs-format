@@ -5613,6 +5613,10 @@ module.exports = {
 			[],
 			"S"
 		],
+		"eth_getStatus": [
+			[],
+			"ChainStatus"
+		],
 		"eth_syncing": [
 			[],
 			"B|EthSyncing"
@@ -5689,7 +5693,7 @@ module.exports = {
 			[
 				"D32"
 			],
-			"Q"
+			"D"
 		],
 		"eth_getUncleCountByBlockHash": [
 			[
@@ -6043,6 +6047,13 @@ module.exports = {
 			"startingBlock": "Q",
 			"currentBlock": "Q",
 			"highestBlock": "Q"
+		},
+		"ChainStatus": {
+			"bestHash": "D32",
+			"blockNumber": "D",
+			"chainId": "D",
+			"epochNumber": "D",
+			"pendingTxNumber": "D"
 		},
 		"SendTransaction": {
 			"__required": [
