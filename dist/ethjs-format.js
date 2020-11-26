@@ -6080,6 +6080,7 @@ module.exports = {
 		},
 		"EstimateGasAndCollateralResult": {
 			"__required": [],
+			"gasLimit": "Q",
 			"gasUsed": "Q",
 			"storageCollateralized": "Q"
 		},
