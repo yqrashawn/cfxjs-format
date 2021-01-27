@@ -75,6 +75,7 @@
     "cfxjs-schema": "0.0.4",
     "ethjs-util": "0.1.3",
     "is-hex-prefixed": "1.0.0",
+    "js-conflux-sdk": "^1.5.7",
     "number-to-bn": "1.7.0",
     "strip-hex-prefix": "1.0.0"
   },
@@ -179,7 +180,7 @@
     "url": "git+ssh://git@github.com/yqrashawn/cfxjs-format.git"
   },
   "scripts": {
-    "build": "npm run build:commonjs && npm run test:lib && npm run build:umd && npm run build:umd:min",
+    "build": "npm run build:commonjs && npm run test:lib && npm run build:umd",
     "build:clean": "npm run test:clean && rimraf ./dist",
     "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib --copy-files",
     "build:umd": "cross-env BABEL_ENV=commonjs NODE_ENV=development webpack --config ./internals/webpack/webpack.config.js ./lib/index.js --progress",
@@ -199,5 +200,22 @@
     "test:clean": "rimraf ./coverage",
     "test:lib": "mocha ./lib/tests/**/*.js -R spec --timeout 2000000"
   },
-  "version": "0.0.4"
+  "version": "0.0.0",
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ],
+    "branches": [
+      "+([0-9])?(.{+([0-9]),x}).x",
+      "master",
+      {
+        "name": "alpha",
+        "channel": "alpha",
+        "prerelease": "alpha"
+      }
+    ]
+  }
 }

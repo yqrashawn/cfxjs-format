@@ -7,6 +7,14 @@ const padToEven = util.padToEven;
 const arrayContainsArray = util.arrayContainsArray;
 const getBinarySize = util.getBinarySize;
 const ten = new BN('10', 10);
+const { format: sdkFormat } = require('js-conflux-sdk');
+
+function isLikeBase32Address(addr) {
+  // this won't return false when there's net1029, net1
+  return /^(cfx(test)?|net\d+):(type\.(null|user|contract|builtin):)?[0123456789abcdefghjkmnprstuvwxyz]{42}$/i.test(
+    addr
+  );
+}
 
 /**
  * Format quantity values, either encode to hex or decode to BigNumber
@@ -19,14 +27,24 @@ const ten = new BN('10', 10);
  * @throws error if value is a float
  */
 function formatQuantity(value, encode, pad) {
-  if (['string', 'number', 'object'].indexOf(typeof value) === -1 || value === null) {
+  if (
+    ['string', 'number', 'object'].indexOf(typeof value) === -1 ||
+    value === null
+  ) {
     return value;
   }
 
   const numberValue = numberToBN(value);
-  const numPadding = numberValue.lt(ten) && pad === true && !numberValue.isZero() ? '0' : '';
+  const numPadding =
+    numberValue.lt(ten) && pad === true && !numberValue.isZero() ? '0' : '';
 
-  if (numberToBN(value).isNeg()) { throw new Error(`[ethjs-format] while formatting quantity '${numberValue.toString(10)}', invalid negative number. Number must be positive or zero.`); }
+  if (numberToBN(value).isNeg()) {
+    throw new Error(
+      `[ethjs-format] while formatting quantity '${numberValue.toString(
+        10
+      )}', invalid negative number. Number must be positive or zero.`
+    );
+  }
 
   return encode ? `0x${numPadding}${numberValue.toString(16)}` : numberValue;
 }
@@ -62,6 +80,9 @@ function formatQuantityOrTag(value, encode) {
  * @throws error if minimum length isnt met
  */
 function formatData(value, byteLength) {
+  if (isLikeBase32Address(value)) {
+    value = sdkFormat.hexAddress(value); // eslint-disable-line
+  }
   var output = value; // eslint-disable-line
   var outputByteLength = 0; // eslint-disable-line
 
@@ -72,12 +93,24 @@ function formatData(value, byteLength) {
   }
 
   // format double padded zeros.
-  if (output === '0x00') { output = '0x0'; }
+  if (output === '0x00') {
+    output = '0x0';
+  }
 
   // throw if bytelength is not correct
-  if (typeof byteLength === 'number' && value !== null && output !== '0x' && output !== '0x0' // support empty values
-    && (!/^[0-9A-Fa-f]+$/.test(stripHexPrefix(output)) || outputByteLength !== 2 + byteLength * 2)) {
-    throw new Error(`[ethjs-format] hex string '${output}' must be an alphanumeric ${2 + byteLength * 2} utf8 byte hex (chars: a-fA-F) string, is ${outputByteLength} bytes`);
+  if (
+    typeof byteLength === 'number' &&
+    value !== null &&
+    output !== '0x' &&
+    output !== '0x0' && // support empty values
+    (!/^[0-9A-Fa-f]+$/.test(stripHexPrefix(output)) ||
+      outputByteLength !== 2 + byteLength * 2)
+  ) {
+    throw new Error(
+      `[ethjs-format] hex string '${output}' must be an alphanumeric ${
+        2 + byteLength * 2
+      } utf8 byte hex (chars: a-fA-F) string, is ${outputByteLength} bytes`
+    );
   }
 
   return output;
@@ -110,13 +143,21 @@ function formatObject(formatter, value, encode) {
 
   // check if all required data keys are fulfilled
   if (!arrayContainsArray(Object.keys(value), formatObject.__required)) { // eslint-disable-line
-    throw new Error(`[ethjs-format] object ${JSON.stringify(value)} must contain properties: ${formatObject.__required.join(', ')}`); // eslint-disable-line
+    throw new Error(
+      `[ethjs-format] object ${JSON.stringify(
+        value
+      )} must contain properties: ${formatObject.__required.join(', ')}` // eslint-disable-line
+    );
   }
 
   // assume formatObject is an object, go through keys and format each
   Object.keys(formatObject).forEach((valueKey) => {
     if (valueKey !== '__required' && typeof value[valueKey] !== 'undefined') {
-      output[valueKey] = format(formatObject[valueKey], value[valueKey], encode);
+      output[valueKey] = format(
+        formatObject[valueKey],
+        value[valueKey],
+        encode
+      );
     }
   });
 
@@ -150,10 +191,18 @@ function formatArray(formatter, value, encode, lengthRequirement) {
   }
 
   // enforce minimum value length requirements
-  if (encode === true
-    && typeof lengthRequirement === 'number'
-    && value.length < lengthRequirement) {
-    throw new Error(`array ${JSON.stringify(value)} must contain at least ${lengthRequirement} params, but only contains ${value.length}.`); // eslint-disable-line
+  if (
+    encode === true &&
+    typeof lengthRequirement === 'number' &&
+    value.length < lengthRequirement
+  ) {
+    throw new Error(
+      `array ${JSON.stringify(
+        value
+      )} must contain at least ${lengthRequirement} params, but only contains ${
+        value.length
+      }.`
+    ); // eslint-disable-line
   }
 
   // make new array, avoid mutation
@@ -169,7 +218,11 @@ function formatArray(formatter, value, encode, lengthRequirement) {
       formatObjectKey = valueIndex;
     }
 
-    output[valueIndex] = format(formatObject[formatObjectKey], valueKey, encode);
+    output[valueIndex] = format(
+      formatObject[formatObjectKey],
+      valueKey,
+      encode
+    );
   });
 
   return output;
@@ -203,9 +256,11 @@ function format(formatter, value, encode, lengthRequirement) {
     output = formatData(value, 32); // dont format data flagged objects like compiler output
   } else {
     // if value is an object or array
-    if (typeof value === 'object'
-      && value !== null
-      && Array.isArray(value) === false) {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      Array.isArray(value) === false
+    ) {
       output = formatObject(formatter, value, encode);
     } else if (Array.isArray(value)) {
       output = formatArray(formatter, value, encode, lengthRequirement);
@@ -225,7 +280,12 @@ function format(formatter, value, encode, lengthRequirement) {
  * @throws error if minimum length isnt met
  */
 function formatInputs(method, inputs) {
-  return format(schema.methods[method][0], inputs, true, schema.methods[method][2]);
+  return format(
+    schema.methods[method][0],
+    inputs,
+    true,
+    schema.methods[method][2]
+  );
 }
 
 /**
