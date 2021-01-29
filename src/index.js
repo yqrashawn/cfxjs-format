@@ -7,7 +7,7 @@ const padToEven = util.padToEven;
 const arrayContainsArray = util.arrayContainsArray;
 const getBinarySize = util.getBinarySize;
 const ten = new BN('10', 10);
-const { format: sdkFormat } = require('js-conflux-sdk');
+const sdkFormat = require('js-conflux-sdk/src/util/format');
 
 function isLikeBase32Address(addr) {
   // this won't return false when there's net1029, net1
